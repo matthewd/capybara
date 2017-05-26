@@ -159,13 +159,15 @@ RSpec.describe Capybara::Server do
       server1 = Capybara::Server.new(app).boot
       server2 = Capybara::Server.new(app).boot
 
-      start_request(server1, 0.5)
-      start_request(server2, 1.0)
+      start_request(server1, 1.0)
+      start_request(server2, 3.0)
 
       expect {
         server1.wait_for_pending_requests
       }.to change{done}.from(false).to(true)
       expect(server2.send(:pending_requests?)).to eq(true)
+      sleep 3
+      expect(server2.send(:pending_requests?)).to eq(false)
     end
 
   end
@@ -199,6 +201,7 @@ RSpec.describe Capybara::Server do
     # Start request, but don't wait for it to finish
     socket = TCPSocket.new(server.host, server.port)
     socket.write "GET /?wait_time=#{wait_time.to_s} HTTP/1.0\r\n\r\n"
+    sleep 0.1
     socket.close
     sleep 0.1
   end
